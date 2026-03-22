@@ -1,7 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, PackagePlus, PackageMinus,
-  Boxes, ClipboardList, LogOut, Menu, X, Package, FolderKanban,
+  Boxes, ClipboardList, LogOut, Menu, X, Package, FolderKanban, BarChart2,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { to: '/items',     icon: Package,         label: '품목 관리' },
   { to: '/stock',     icon: Boxes,           label: '재고 목록' },
   { to: '/projects',  icon: FolderKanban,    label: '프로젝트 현황' },
+  { to: '/stats',     icon: BarChart2,       label: '통계' },
   { to: '/history',   icon: ClipboardList,   label: '이력 조회' },
 ]
 

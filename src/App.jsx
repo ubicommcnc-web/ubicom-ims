@@ -8,6 +8,7 @@ import Outbound from './pages/Outbound'
 import Items from './pages/Items'
 import StockList from './pages/StockList'
 import Projects from './pages/Projects'
+import Stats from './pages/Stats'
 import History from './pages/History'
 
 function PrivateRoute({ children }) {
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="items"     element={<Items />} />
         <Route path="stock"     element={<StockList />} />
         <Route path="projects"  element={<Projects />} />
+        <Route path="stats"     element={<Stats />} />
         <Route path="history"   element={<History />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
