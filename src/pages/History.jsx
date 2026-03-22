@@ -1,9 +1,10 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Search, RefreshCw } from 'lucide-react'
+import { Search, RefreshCw, FileDown } from 'lucide-react'
 import { fetchTransactions, fetchItems } from '../services/sheetsApi'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PageHeader from '../components/PageHeader'
 import { TypeBadge } from './Dashboard'
+import { exportHistory } from '../utils/exportExcel'
 
 export default function History() {
   const [txs, setTxs]         = useState([])
@@ -67,10 +68,20 @@ export default function History() {
         title="이력 조회"
         description="입출고 전체 이력을 확인합니다."
         action={
-          <button onClick={load} className="btn-secondary" disabled={loading}>
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-            새로고침
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => exportHistory(filtered, itemMap)}
+              disabled={loading || filtered.length === 0}
+              className="btn-secondary"
+            >
+              <FileDown size={15} />
+              엑셀 내보내기
+            </button>
+            <button onClick={load} className="btn-secondary" disabled={loading}>
+              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+              새로고침
+            </button>
+          </div>
         }
       />
 

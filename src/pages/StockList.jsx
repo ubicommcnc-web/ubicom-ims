@@ -1,9 +1,10 @@
 import { useEffect, useState, useMemo } from 'react'
-import { Search, RefreshCw, AlertTriangle } from 'lucide-react'
+import { Search, RefreshCw, AlertTriangle, FileDown } from 'lucide-react'
 import { fetchStock, fetchItems, recalcStock } from '../services/sheetsApi'
 import { CATEGORIES } from '../config/google'
 import LoadingSpinner from '../components/LoadingSpinner'
 import PageHeader from '../components/PageHeader'
+import { exportStockList } from '../utils/exportExcel'
 
 export default function StockList() {
   const [stock, setStock]     = useState([])
@@ -58,10 +59,20 @@ export default function StockList() {
         title="재고 목록"
         description={`전체 ${stock.length}종 품목`}
         action={
-          <button onClick={() => load(true)} className="btn-secondary" disabled={loading}>
-            <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-            재계산
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => exportStockList(filtered, itemMap)}
+              disabled={loading || filtered.length === 0}
+              className="btn-secondary"
+            >
+              <FileDown size={15} />
+              엑셀 내보내기
+            </button>
+            <button onClick={() => load(true)} className="btn-secondary" disabled={loading}>
+              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+              재계산
+            </button>
+          </div>
         }
       />
 
