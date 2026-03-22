@@ -92,6 +92,74 @@ export async function addItem(item) {
   return id
 }
 
+/** items 시트에서 특정 품목의 실제 행 번호를 반환 (1-based, 헤더 제외 → 최소 2) */
+async function findItemRowIndex(itemId) {
+  const rows = await getRange(`${SHEETS.ITEMS}!A2:A`)
+  const idx = rows.findIndex((r) => r[0] === itemId)
+  if (idx === -1) throw new Error(`품목 ID(${itemId})를 찾을 수 없습니다.`)
+  return idx + 2 // 헤더 행(row 1) + 0-based 배열 인덱스
+}
+
+/** 시트 탭 이름으로 numeric sheetId 조회 (batchUpdate용) */
+async function getSheetId(sheetName) {
+  const token = getToken()
+  const url = `${BASE}/${GOOGLE_CONFIG.spreadsheetId}?fields=sheets.properties`
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  if (!res.ok) throw new Error(`시트 정보 조회 실패: ${res.status}`)
+  const data = await res.json()
+  const sheet = data.sheets?.find((s) => s.properties.title === sheetName)
+  if (!sheet) throw new Error(`시트 '${sheetName}'를 찾을 수 없습니다.`)
+  return sheet.properties.sheetId
+}
+
+/** 품목 수정 */
+export async function updateItem(item) {
+  const rowIndex = await findItemRowIndex(item.id)
+  await updateRange(`${SHEETS.ITEMS}!A${rowIndex}:H${rowIndex}`, [[
+    item.id,
+    item.name,
+    item.brand,
+    item.category,
+    item.model,
+    item.unit || '개',
+    Number(item.minStock) || 0,
+    item.note || '',
+  ]])
+}
+
+/** 품목 삭제 — batchUpdate deleteDimension 사용 */
+export async function deleteItem(itemId) {
+  const [rowIndex, sheetId] = await Promise.all([
+    findItemRowIndex(itemId),
+    getSheetId(SHEETS.ITEMS),
+  ])
+  const token = getToken()
+  const url = `${BASE}/${GOOGLE_CONFIG.spreadsheetId}:batchUpdate`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      requests: [{
+        deleteDimension: {
+          range: {
+            sheetId,
+            dimension: 'ROWS',
+            startIndex: rowIndex - 1, // 0-based
+            endIndex:   rowIndex,     // exclusive
+          },
+        },
+      }],
+    }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err?.error?.message || `삭제 오류: ${res.status}`)
+  }
+}
+
 // ──────────────────────────────────────────────
 // 이력 (transactions 시트)
 // ──────────────────────────────────────────────

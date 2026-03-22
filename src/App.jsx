@@ -5,6 +5,7 @@ import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Inbound from './pages/Inbound'
 import Outbound from './pages/Outbound'
+import Items from './pages/Items'
 import StockList from './pages/StockList'
 import History from './pages/History'
 
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="inbound"   element={<Inbound />} />
         <Route path="outbound"  element={<Outbound />} />
+        <Route path="items"     element={<Items />} />
         <Route path="stock"     element={<StockList />} />
         <Route path="history"   element={<History />} />
       </Route>
