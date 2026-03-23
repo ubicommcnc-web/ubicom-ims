@@ -41,6 +41,25 @@ async function getRange(range) {
   return data.values || []
 }
 
+/**
+ * Excel/Sheets 시리얼 넘버 → 'YYYY-MM-DD' 문자열 변환
+ * - 이미 날짜 문자열이면 그대로 반환
+ * - 숫자(시리얼)이면 UTC 기준으로 변환
+ *   공식: (serial - 25569) * 86400 * 1000 → Unix ms
+ */
+function serialToDateStr(value) {
+  if (!value && value !== 0) return ''
+  // 이미 'YYYY-MM-DD' 형식이면 그대로
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}/.test(value)) return value
+  const serial = Number(value)
+  if (isNaN(serial) || serial <= 0) return String(value)
+  const date = new Date((serial - 25569) * 86400 * 1000)
+  const yyyy = date.getUTCFullYear()
+  const mm   = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const dd   = String(date.getUTCDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 /** 시트에 행 추가 */
 async function appendRow(sheet, row) {
   return apiFetch(
@@ -169,7 +188,7 @@ export async function fetchTransactions() {
   const rows = await getRange(`${SHEETS.TRANSACTIONS}!A2:I`)
   return rows.map((r) => ({
     id:      r[TX_COLS.ID]      || '',
-    date:    r[TX_COLS.DATE]    || '',
+    date:    serialToDateStr(r[TX_COLS.DATE]),
     itemId:  r[TX_COLS.ITEM_ID] || '',
     type:    r[TX_COLS.TYPE]    || '',
     qty:     Number(r[TX_COLS.QTY]) || 0,
